@@ -50,7 +50,8 @@ public class ReverseSpellerUI extends UI {
 			RestTemplate service = new RestTemplate();
 			String reversed = null;
 			try {
-				reversed = service.getForObject(new URI(""), String.class);
+				reversed = service.getForObject(new URI("https://revese-speller.herokuapp.com/api/reverse/" + text),
+						String.class);
 			} catch (RestClientException | URISyntaxException e1) {
 				Notification.show(e1.getMessage());
 				e1.printStackTrace();
