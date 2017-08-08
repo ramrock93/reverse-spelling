@@ -6,17 +6,19 @@ import java.net.URISyntaxException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.spring.annotation.SpringUI;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.ui.Alignment;
 
 @SpringUI
 public class ReverseSpellerUI extends UI {
@@ -44,14 +46,18 @@ public class ReverseSpellerUI extends UI {
 		header.addStyleName(ValoTheme.LABEL_BOLD);
 
 		input = new TextField("Your name:");
+		input.setWidth("100%");
 		input.addStyleName(ValoTheme.TEXTFIELD_HUGE);
 
 		resultHeader = new Label("Your name spelled backwards:");
 
 		result = new Label();
+		result.setWidth("100%");
 		result.addStyleName(ValoTheme.LABEL_H1);
+		result.addStyleName(ValoTheme.TEXTFIELD_ALIGN_CENTER);
 
 		submit = new Button("Reverse");
+		submit.setWidth("100%");
 		submit.addStyleName(ValoTheme.BUTTON_PRIMARY);
 		submit.addStyleName(ValoTheme.BUTTON_HUGE);
 
@@ -65,22 +71,33 @@ public class ReverseSpellerUI extends UI {
 		submit.addClickListener(e -> {
 			String text = input.getValue().replaceAll(" ", "%20");
 
-			RestTemplate service = new RestTemplate();
-			String reversed = null;
-			try {
-				reversed = service.getForObject(new URI("https://revese-speller.herokuapp.com/api/reverse/" + text),
-						String.class);
-			} catch (RestClientException | URISyntaxException e1) {
-				Notification.show(e1.getMessage());
-				e1.printStackTrace();
+			if (text.equals("") || text == null) {
+				Notification.show("Please enter in something...", Type.ASSISTIVE_NOTIFICATION);
+			} else {
+				String reversed = callApi(text);
+				result.setValue(reversed);
 			}
-			result.setValue(reversed);
 		});
+
+		submit.setClickShortcut(KeyCode.ENTER);
 
 		grid.addComponent(header, 1, 0);
 		grid.setComponentAlignment(header, Alignment.TOP_CENTER);
 		grid.addComponent(vLayout, 1, 1);
 		setContent(grid);
+	}
+
+	private String callApi(String text) {
+		RestTemplate service = new RestTemplate();
+		String reversed = null;
+		try {
+			reversed = service.getForObject(new URI("https://reverse-speller.herokuapp.com/api/reverse/" + text),
+					String.class);
+		} catch (RestClientException | URISyntaxException e1) {
+			Notification.show(e1.getMessage(), Type.ERROR_MESSAGE);
+			e1.printStackTrace();
+		}
+		return reversed;
 	}
 
 }
