@@ -45,7 +45,7 @@ public class ReverseSpellerUI extends UI {
 		vLayout.addComponents(hLayout, result);
 
 		submit.addClickListener(e -> {
-			String text = input.getValue();
+			String text = input.getValue().replaceAll(" ", "%20");
 
 			RestTemplate service = new RestTemplate();
 			String reversed = null;
